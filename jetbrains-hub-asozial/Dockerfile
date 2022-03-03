@@ -1,5 +1,5 @@
-ARG HUB_VERSION=2020.1.12722
-ARG IMAGE=jetbrains/hub:$HUB_VERSION
+ARG HUB_VERSION
+ARG IMAGE=docker.io/jetbrains/hub:$HUB_VERSION
 FROM $IMAGE
 ARG PRODUCT=hub
 ARG HUB_VERSION
@@ -12,6 +12,7 @@ RUN apt-get update \
  && sed -i 's/ do not / /' templates/en/email-notification-layout.ftl \
  && zip -rf jetbrains.jetpass.notification-$HUB_VERSION.jar templates \
  && rm -rf templates \
+ && cd / \
  && apt-get purge -y --autoremove zip unzip \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
