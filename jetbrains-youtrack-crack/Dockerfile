@@ -1,4 +1,4 @@
-# syntax=docker.io/docker/dockerfile:1.4
+# syntax=docker.io/docker/dockerfile:1.5
 ARG VERSION
 ARG IMAGE=docker.io/jetbrains/youtrack:$VERSION
 FROM $IMAGE
@@ -7,10 +7,12 @@ USER root
 
 
 RUN <<c81b94933420221a7ac004a90242d8b1d3e5070d sh
+set -eux
+savedAptMark="$(apt-mark showmanual)"
 mkdir -p /usr/share/man/man1
 apt-get update
 apt-get install -y --no-install-recommends curl patch zip openjdk-11-jdk-headless
-curl -ko /cfr.jar https://www.benf.org/other/cfr/cfr-0.150.jar
+curl -sSfko /cfr.jar https://www.benf.org/other/cfr/cfr-0.150.jar
 cd /opt/youtrack/apps/youtrack/web/WEB-INF/lib
 java -cp .:/cfr.jar org.benf.cfr.reader.Main jetbrains.teamsys.license.runtime.LicenseChecker --outputdir .
 
@@ -68,8 +70,9 @@ sh -c "javac --release 8 -g -cp \$(ls annotations-*.jar):ring-license-checker-1.
 zip -rf ring-license-checker-1.0.32.jar jetbrains
 rm -rf jetbrains
 rm -f /cfr.jar
-apt-get purge -y --autoremove curl patch zip openjdk-11-jdk-headless
-apt-get clean
+apt-mark auto '.*' > /dev/null
+apt-mark manual $savedAptMark
+apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false
 rm -rf /var/lib/apt/lists/*
 c81b94933420221a7ac004a90242d8b1d3e5070d
 
